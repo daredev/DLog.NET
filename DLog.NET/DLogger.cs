@@ -7,13 +7,14 @@ using DLog.NET.Models;
 
 namespace DLog.NET
 {
-    public class Logger
+    public class DLogger
     {
-        private List<LogMessage> logEntries;
+        private List<DLogMessage> logEntries;
 
         private List<TextBox> targetTextBoxes;
         private List<FileInfo> targetFiles;
         private List<NotifyIcon> targetNotifyIcons;
+        private List<ProgressBar> targetProgressBars;
 
         public List<NotifyIcon> TargetNotifyIcons
         {
@@ -30,12 +31,17 @@ namespace DLog.NET
             get { return targetTextBoxes; }
         }
 
+        public List<ProgressBar> TargetProgressBars
+        {
+            get { return targetProgressBars; }
+        } 
+
         /// <summary>
         /// Instanciates Log class
         /// </summary>
-        public Logger()
+        public DLogger()
         {
-            logEntries = new List<LogMessage>();
+            logEntries = new List<DLogMessage>();
         }
 
 
@@ -82,16 +88,23 @@ namespace DLog.NET
             AddTargetFile(file.FullName);
         }
 
+        public void AddProgressBar(ProgressBar progressBar)
+        {
+            if (targetProgressBars == null)
+                targetProgressBars = new List<ProgressBar>();
+            targetProgressBars.Add(progressBar);
+        }
+
 
         /// <summary>
         /// Outputs log to controls and files (if previously set)
         /// </summary>
         /// <param name="message">Log message</param>
-        public void Write(string message)
+        public void Write(string message, int progress = -1)
         {
-            LogMessage msg = new LogMessage(message);
+            DLogMessage msg = new DLogMessage(message);
             if (logEntries == null)
-                logEntries = new List<LogMessage>();
+                logEntries = new List<DLogMessage>();
             logEntries.Add(msg);
 
             foreach (var entry in logEntries)
@@ -101,7 +114,7 @@ namespace DLog.NET
                     foreach (Control control in targetTextBoxes)
                     {
                         Control myControl = control;
-                        LogMessage myLogEntry = entry;
+                        DLogMessage myLogEntry = entry;
                         control.InvokeIfRequired(delegate
                         {
                             myControl.Text += myLogEntry.GetFormatted() + Environment.NewLine;
@@ -146,8 +159,23 @@ namespace DLog.NET
                         notifyIcon.ShowBalloonTip(1, "Information", entry.Message, icon);
                     }
                 }
+
+                if (progress > -1)
+                {
+                    if (targetProgressBars != null)
+                    {
+                        foreach (ProgressBar progressBar in targetProgressBars)
+                        {
+                            progressBar.InvokeIfRequired(delegate
+                            {
+                                progressBar.Value = progress;
+                            });
+                        }
+                    }
+                }
+
             }
-            logEntries = new List<LogMessage>();
+            logEntries = new List<DLogMessage>();
         }
 
 
