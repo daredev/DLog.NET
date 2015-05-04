@@ -15,6 +15,7 @@ namespace DLog.NET
         private List<FileInfo> targetFiles;
         private List<NotifyIcon> targetNotifyIcons;
         private List<ProgressBar> targetProgressBars;
+        private List<ToolStripProgressBar> targetToolStripProgressBars; 
 
         public List<NotifyIcon> TargetNotifyIcons
         {
@@ -34,6 +35,11 @@ namespace DLog.NET
         public List<ProgressBar> TargetProgressBars
         {
             get { return targetProgressBars; }
+        }
+
+        public List<ToolStripProgressBar> TargetToolStripProgressBars
+        {
+            get { return targetToolStripProgressBars; }
         } 
 
         /// <summary>
@@ -65,6 +71,10 @@ namespace DLog.NET
             if (targetFiles == null)
                 targetFiles = new List<FileInfo>();
             FileInfo newTargetFile = new FileInfo(path);
+            if (newTargetFile.Directory != null && !newTargetFile.Directory.Exists)
+                Directory.CreateDirectory(newTargetFile.Directory.FullName);
+            if (!newTargetFile.Exists)
+                File.CreateText(newTargetFile.FullName);
             targetFiles.Add(newTargetFile);
         }
 
@@ -95,6 +105,12 @@ namespace DLog.NET
             targetProgressBars.Add(progressBar);
         }
 
+        public void AddToolStripProgressBar(ToolStripProgressBar progressBar)
+        {
+            if (targetToolStripProgressBars == null)
+                targetToolStripProgressBars = new List<ToolStripProgressBar>();
+            targetToolStripProgressBars.Add(progressBar);
+        }
 
         /// <summary>
         /// Outputs log to controls and files (if previously set)
@@ -172,6 +188,15 @@ namespace DLog.NET
                             });
                         }
                     }
+
+                    if (targetToolStripProgressBars != null)
+                    {
+                        foreach (ToolStripProgressBar toolStripProgressBar in targetToolStripProgressBars)
+                        {
+                            toolStripProgressBar.Value = progress;
+                        }
+                    }
+
                 }
 
             }
