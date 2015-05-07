@@ -74,7 +74,11 @@ namespace DLog.NET
             if (newTargetFile.Directory != null && !newTargetFile.Directory.Exists)
                 Directory.CreateDirectory(newTargetFile.Directory.FullName);
             if (!newTargetFile.Exists)
-                File.CreateText(newTargetFile.FullName);
+            {
+                StreamWriter sw = File.CreateText(newTargetFile.FullName);
+                sw.Flush();
+                sw.Close();
+            }
             targetFiles.Add(newTargetFile);
         }
 
@@ -151,12 +155,16 @@ namespace DLog.NET
                             using (StreamWriter sw = targetFile.CreateText())
                             {
                                 sw.WriteLine("Log started");
+                                sw.Flush();
+                                sw.Close();
                             }
                         }
 
                         using (StreamWriter sw = targetFile.AppendText())
                         {
                             sw.WriteLine(entry.GetFormatted());
+                            sw.Flush();
+                            sw.Close();
                         }
                     }
                 }
