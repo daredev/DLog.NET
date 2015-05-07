@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Windows.Forms;
 using DLog.NET.Extenstions;
 using DLog.NET.Models;
@@ -63,6 +64,16 @@ namespace DLog.NET
         }
 
         /// <summary>
+        /// Removes TextBox control from log output
+        /// </summary>
+        /// <param name="textBox">TextBox to remove</param>
+        public void RemoveTargetTextBox(TextBox textBox)
+        {
+            if (targetTextBoxes.Contains(textBox))
+                targetTextBoxes.Remove(textBox);
+        }
+
+        /// <summary>
         /// Adds file by path for log output target file list
         /// </summary>
         /// <param name="path">Path of the file</param>
@@ -83,6 +94,19 @@ namespace DLog.NET
         }
 
         /// <summary>
+        /// Removes file from log output
+        /// </summary>
+        /// <param name="path">Log file path</param>
+        public void RemoveTargetFile(string path)
+        {
+            foreach (FileInfo targetFile in targetFiles.ToList())
+            {
+                if (targetFile.FullName == path)
+                    targetFiles.Remove(targetFile);
+            }
+        }
+
+        /// <summary>
         /// Adds NotifyIcon control for log output 
         /// </summary>
         /// <param name="notifyIcon">NotifyIcon to add</param>
@@ -94,6 +118,16 @@ namespace DLog.NET
         }
 
         /// <summary>
+        /// Removes Notify Icon control from log output
+        /// </summary>
+        /// <param name="notifyIcon">Notify Icon control to remove</param>
+        public void RemoveTargetNotifyIcon(NotifyIcon notifyIcon)
+        {
+            if (targetNotifyIcons.Contains(notifyIcon))
+                targetNotifyIcons.Remove(notifyIcon);
+        }
+
+        /// <summary>
         /// Adds file by FileInfo type variable for log output target file list
         /// </summary>
         /// <param name="file">FileInfo type variable</param>
@@ -102,6 +136,10 @@ namespace DLog.NET
             AddTargetFile(file.FullName);
         }
 
+        /// <summary>
+        /// Adds Progress Bar control for log output
+        /// </summary>
+        /// <param name="progressBar">Progress Bar control to add</param>
         public void AddProgressBar(ProgressBar progressBar)
         {
             if (targetProgressBars == null)
@@ -109,6 +147,20 @@ namespace DLog.NET
             targetProgressBars.Add(progressBar);
         }
 
+        /// <summary>
+        /// Removes Progress Bar control from log output
+        /// </summary>
+        /// <param name="progressBar">Progress Bar control to remove</param>
+        public void RemoveTargetProgressBar(ProgressBar progressBar)
+        {
+            if (targetProgressBars.Contains(progressBar))
+                targetProgressBars.Remove(progressBar);
+        }
+
+        /// <summary>
+        /// Adds ToolStripProgressBar control for log output
+        /// </summary>
+        /// <param name="progressBar">ToolStripProgressBar control to add</param>
         public void AddToolStripProgressBar(ToolStripProgressBar progressBar)
         {
             if (targetToolStripProgressBars == null)
@@ -117,9 +169,20 @@ namespace DLog.NET
         }
 
         /// <summary>
-        /// Outputs log to controls and files (if previously set)
+        /// Removes ToolStripProgressBar control from log output
+        /// </summary>
+        /// <param name="progressBar">ToolStripProgressBar control to remove</param>
+        public void RemoveTargetProgressBar(ToolStripProgressBar progressBar)
+        {
+            if (targetToolStripProgressBars.Contains(progressBar))
+                targetToolStripProgressBars.Remove(progressBar);
+        }
+
+        /// <summary>
+        /// Outputs log to each target objects
         /// </summary>
         /// <param name="message">Log message</param>
+        /// <param name="progress">(Optional) Progress value (for ProgressBar type controls)</param>
         public void Write(string message, int progress = -1)
         {
             DLogMessage msg = new DLogMessage(message);
