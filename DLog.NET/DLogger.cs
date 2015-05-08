@@ -12,11 +12,11 @@ namespace DLog.NET
     {
         private List<DLogMessage> logEntries;
 
-        private List<TextBox> targetTextBoxes;
-        private List<FileInfo> targetFiles;
-        private List<NotifyIcon> targetNotifyIcons;
-        private List<ProgressBar> targetProgressBars;
-        private List<ToolStripProgressBar> targetToolStripProgressBars; 
+        private List<TextBox> targetTextBoxes = new List<TextBox>();
+        private List<FileInfo> targetFiles = new List<FileInfo>();
+        private List<NotifyIcon> targetNotifyIcons = new List<NotifyIcon>();
+        private List<ProgressBar> targetProgressBars = new List<ProgressBar>();
+        private List<ToolStripProgressBar> targetToolStripProgressBars = new List<ToolStripProgressBar>();
 
         public List<NotifyIcon> TargetNotifyIcons
         {
@@ -90,7 +90,16 @@ namespace DLog.NET
                 sw.Flush();
                 sw.Close();
             }
-            targetFiles.Add(newTargetFile);
+            bool exists = false;
+
+            foreach (FileInfo targetFile in targetFiles)
+            {
+                if (targetFile.FullName == path)
+                    exists = true;
+            }
+
+            if (!exists)
+                targetFiles.Add(newTargetFile);
         }
 
         /// <summary>
@@ -218,16 +227,12 @@ namespace DLog.NET
                             using (StreamWriter sw = targetFile.CreateText())
                             {
                                 sw.WriteLine("Log started");
-                                sw.Flush();
-                                sw.Close();
                             }
                         }
 
                         using (StreamWriter sw = targetFile.AppendText())
                         {
                             sw.WriteLine(entry.GetFormatted());
-                            sw.Flush();
-                            sw.Close();
                         }
                     }
                 }
@@ -253,9 +258,10 @@ namespace DLog.NET
                     {
                         foreach (ProgressBar progressBar in targetProgressBars)
                         {
-                            progressBar.InvokeIfRequired(delegate
+                            ProgressBar bar = progressBar;
+                            bar.InvokeIfRequired(delegate
                             {
-                                progressBar.Value = progress;
+                                bar.Value = progress;
                             });
                         }
                     }

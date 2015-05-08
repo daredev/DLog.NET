@@ -2,12 +2,12 @@
 
 namespace DLog.NET.Models
 {
-    public class DLogMessage
+    class DLogMessage
     {
         private readonly DateTime _timestamp;
         private readonly string _message;
 
-        public DateTime TimeStamp { get { return _timestamp; } }
+        private DateTime TimeStamp { get { return _timestamp; } }
         public string Message { get { return _message; } }
 
         public DLogMessage(string message)
