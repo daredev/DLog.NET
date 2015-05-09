@@ -1,2 +1,2 @@
 language: csharp
-solution: DLog.NET\DLog.NET.sln
+solution: DLog.NET/DLog.NET.sln
