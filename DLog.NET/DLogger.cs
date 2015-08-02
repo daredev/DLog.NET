@@ -199,7 +199,7 @@ namespace DLog.NET
                 logEntries = new List<DLogMessage>();
             logEntries.Add(msg);
 
-            foreach (var entry in logEntries)
+            foreach (var entry in logEntries.AsEnumerable())
             {
                 if (targetTextBoxes != null)
                 {
