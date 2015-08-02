@@ -194,12 +194,16 @@ namespace DLog.NET
         /// <param name="progress">(Optional) Progress value (for ProgressBar type controls)</param>
         public void Write(string message, int progress = -1)
         {
+            List<DLogMessage> m_logEntries;
             DLogMessage msg = new DLogMessage(message);
             if (logEntries == null)
-                logEntries = new List<DLogMessage>();
-            logEntries.Add(msg);
+                m_logEntries = new List<DLogMessage>();
+            else
+                m_logEntries = logEntries;
 
-            foreach (var entry in logEntries.AsEnumerable())
+            m_logEntries.Add(msg);
+
+            foreach (var entry in m_logEntries.AsEnumerable())
             {
                 if (targetTextBoxes != null)
                 {
