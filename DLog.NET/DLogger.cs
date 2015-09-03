@@ -41,7 +41,11 @@ namespace DLog.NET
         public List<ToolStripProgressBar> TargetToolStripProgressBars
         {
             get { return targetToolStripProgressBars; }
-        } 
+        }
+
+        public bool IsConsoleUsed = false;
+        public TextWriter ConsoleOut = null;
+
 
         /// <summary>
         /// Instanciates Log class
@@ -51,6 +55,19 @@ namespace DLog.NET
             logEntries = new List<DLogMessage>();
         }
 
+
+        /// <summary>
+        /// Adds support for outputting to console out
+        /// </summary>
+        /// <param name="consoleOut">Console.Out from Console Application code</param>
+        public void AddConsoleOut(TextWriter consoleOut)
+        {
+            if (consoleOut != null)
+            {
+                IsConsoleUsed = true;
+                ConsoleOut = consoleOut;
+            }
+        }
 
         /// <summary>
         /// Adds TextBox control for log output target control list
@@ -224,19 +241,38 @@ namespace DLog.NET
                 }
                 if (targetFiles != null)
                 {
+                    object lockObject = new object();
+
                     foreach (FileInfo targetFile in targetFiles)
                     {
-                        if (!targetFile.Exists)
+                        lock (lockObject)
                         {
-                            using (StreamWriter sw = targetFile.CreateText())
+                            if (!targetFile.Exists)
                             {
-                                sw.WriteLine("Log started");
+                                using (
+                                    var fs = File.Open(targetFile.FullName, FileMode.Create, FileAccess.Write,
+                                        FileShare.ReadWrite))
+                                {
+                                    using (StreamWriter sw = new StreamWriter(fs))
+                                    {
+                                        sw.AutoFlush = true;
+                                        sw.WriteLine("Log started");
+                                        sw.Flush();
+                                    }
+                                }
                             }
-                        }
-
-                        using (StreamWriter sw = targetFile.AppendText())
-                        {
-                            sw.WriteLine(entry.GetFormatted());
+                            else
+                            {
+                                using (var fs = File.Open(targetFile.FullName, FileMode.Append, FileAccess.Write, FileShare.ReadWrite))
+                                {
+                                    using (StreamWriter sw = new StreamWriter(fs))
+                                    {
+                                        sw.AutoFlush = true;
+                                        sw.WriteLine(entry.GetFormatted());
+                                        sw.Flush();
+                                    }
+                                }
+                            }
                         }
                     }
                 }
@@ -279,7 +315,10 @@ namespace DLog.NET
                     }
 
                 }
-
+                if (IsConsoleUsed && ConsoleOut != null)
+                {
+                    ConsoleOut.WriteLine(entry.GetFormatted());
+                }
             }
             logEntries = new List<DLogMessage>();
         }
