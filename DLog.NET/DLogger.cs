@@ -228,8 +228,11 @@ namespace DLog.NET
             this.username = username;
             try
             {
+                if (connection.State != ConnectionState.Closed)
+                    connection.Close();
                 connection.Open();
-                IsDatabaseUsed = true;
+                if (connection.State == ConnectionState.Open)
+                    IsDatabaseUsed = true;
                 connection.Close();
             }
             catch (Exception)
@@ -363,7 +366,8 @@ namespace DLog.NET
                         string logInsertCommand = string.Format(logInsertCommandTemplate, tableName, usernameColumn, messageColumn, eventDateColumn, username,entry.Message, DateTime.Now);
                         SqlCommand sqlCmd = new SqlCommand(logInsertCommand, connection);
                         sqlCmd.CommandType = CommandType.Text;
-                        connection.Open();
+                        if (connection.State != ConnectionState.Open)
+                            connection.Open();
                         sqlCmd.ExecuteNonQuery();
                         connection.Close();
                     }
