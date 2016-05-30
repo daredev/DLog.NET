@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
+using System.Data.SqlClient;
 using System.IO;
 using System.Linq;
 using System.Windows.Forms;
@@ -17,6 +19,13 @@ namespace DLog.NET
         private List<NotifyIcon> targetNotifyIcons = new List<NotifyIcon>();
         private List<ProgressBar> targetProgressBars = new List<ProgressBar>();
         private List<ToolStripProgressBar> targetToolStripProgressBars = new List<ToolStripProgressBar>();
+
+        private SqlConnection connection = new SqlConnection();
+        private string tableName;
+        private string usernameColumn;
+        private string messageColumn;
+        private string eventDateColumn;
+        private string username;
 
         public List<NotifyIcon> TargetNotifyIcons
         {
@@ -44,6 +53,7 @@ namespace DLog.NET
         }
 
         public bool IsConsoleUsed = false;
+        public bool IsDatabaseUsed = false;
         public TextWriter ConsoleOut = null;
 
 
@@ -204,6 +214,31 @@ namespace DLog.NET
                 targetToolStripProgressBars.Remove(progressBar);
         }
 
+
+        /* Experimental */
+
+        public void AddDatabase(SqlConnection connection, string tableName, string usernameColumn, string messageColumn,
+            string eventDateColumn, string username)
+        {
+            this.connection = connection;
+            this.tableName = tableName;
+            this.usernameColumn = usernameColumn;
+            this.messageColumn = messageColumn;
+            this.eventDateColumn = eventDateColumn;
+            this.username = username;
+            try
+            {
+                connection.Open();
+                IsDatabaseUsed = true;
+                connection.Close();
+            }
+            catch (Exception)
+            {
+                IsDatabaseUsed = false;
+            }
+        }
+
+
         /// <summary>
         /// Outputs log to each target objects
         /// </summary>
@@ -318,6 +353,20 @@ namespace DLog.NET
                 if (IsConsoleUsed && ConsoleOut != null)
                 {
                     ConsoleOut.WriteLine(entry.GetFormatted());
+                }
+                if (IsDatabaseUsed)
+                {
+                    if (!string.IsNullOrEmpty(tableName) && !string.IsNullOrEmpty(usernameColumn) &&
+                        !string.IsNullOrEmpty(messageColumn) && !string.IsNullOrEmpty(eventDateColumn) && !string.IsNullOrEmpty(username))
+                    {
+                        string logInsertCommandTemplate = "INSERT INTO [{0}] ([{1}], [{2}], [{3}]) VALUES ('{4}','{5}','{6}')";
+                        string logInsertCommand = string.Format(logInsertCommandTemplate, tableName, usernameColumn, messageColumn, eventDateColumn, username,entry.Message, DateTime.Now);
+                        SqlCommand sqlCmd = new SqlCommand(logInsertCommand, connection);
+                        sqlCmd.CommandType = CommandType.Text;
+                        connection.Open();
+                        sqlCmd.ExecuteNonQuery();
+                        connection.Close();
+                    }
                 }
             }
             logEntries = new List<DLogMessage>();
