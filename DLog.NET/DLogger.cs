@@ -363,7 +363,7 @@ namespace DLog.NET
                         !string.IsNullOrEmpty(messageColumn) && !string.IsNullOrEmpty(eventDateColumn) && !string.IsNullOrEmpty(username))
                     {
                         string logInsertCommandTemplate = "INSERT INTO [{0}] ([{1}], [{2}], [{3}]) VALUES ('{4}','{5}','{6}')";
-                        string logInsertCommand = string.Format(logInsertCommandTemplate, tableName, usernameColumn, messageColumn, eventDateColumn, username,entry.Message, DateTime.Now);
+                        string logInsertCommand = string.Format(logInsertCommandTemplate, tableName, usernameColumn, messageColumn, eventDateColumn, username,entry.Message.Replace("'","''"), DateTime.Now);
                         SqlCommand sqlCmd = new SqlCommand(logInsertCommand, connection);
                         sqlCmd.CommandType = CommandType.Text;
                         if (connection.State != ConnectionState.Open)
